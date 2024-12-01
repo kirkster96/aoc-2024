@@ -7,16 +7,37 @@ fun distance(a:Int, b:Int):Int {
     else if (a > b) return a - b
     else return b - a
 }
+fun part1(l: List<Int>,r: List<Int>): Int {
+
+    val listPairs = l.sorted().zip(r.sorted())
+
+    val result: Int = listPairs.map { distance(it.first, it.second) }.reduce { acc, i -> acc + i }
+
+    return result
+}
+
+fun part2(l: List<Int>,r: List<Int>): Int {
+    var rCounts: MutableMap<Int, Int>  = r.sorted()
+        .distinct()
+        .map { mutableMapOf<Int, Int>(Pair(it, 0)) }
+        .reduce { acc, mutableMap -> run {
+            acc.putAll(mutableMap)
+            acc
+        }}
+
+    r.sorted().forEach {  run {
+        val x = rCounts.getValue(it)
+        rCounts[it] = x + 1
+    } }
+
+    val result = l.sorted()
+        .map { it * rCounts.getOrDefault(it, 0) }   // count * multiplier
+        .reduce { acc, i -> acc + i }
+
+    return result
+}
 
 fun main() {
-    fun part1(input: List<Int>): Int {
-        return input.size
-    }
-
-    fun part2(input: List<Int>): Int {
-        return input.size
-    }
-
 
     // Read the input from the `src/Day01.txt` file.
     var group1 = listOf<Int>()
@@ -26,33 +47,8 @@ fun main() {
         group1 = group1.plus(entry1.toInt())
         group2 = group2.plus(entry2.toInt())
     } }
-    group1 = group1.sorted()
-    group2 = group2.sorted()
 
-    val groupPairs = group1.zip(group2)
-
-    val resultPart1: Int = groupPairs.map { distance(it.first, it.second) }.reduce { acc, i -> acc + i }
-
-    resultPart1.println()
-
-    var g2Counts: MutableMap<Int, Int>  = group2
-        .distinct()
-        .map { mutableMapOf<Int, Int>(Pair(it, 0)) }
-        .reduce { acc, mutableMap -> run {
-            acc.putAll(mutableMap)
-            acc
-        }}
-
-    group2.forEach {  run {
-        val x = g2Counts.getValue(it)
-        g2Counts[it] = x + 1
-    } }
-
-    val result2 = group1
-        .map { it * g2Counts.getOrDefault(it, 0) }   // count * multiplier
-        .reduce { acc, i -> acc + i }
-
-    println(result2)
-
+    part1(group1,group2).println()
+    part2(group1,group2).println()
 
 }
