@@ -63,7 +63,7 @@ fun main() {
         return filterProductions.map { it[it.size/2] }.sum()
     }
 
-    fun remediateProduction(longs: List<Long>, rules: List<String>) {
+    fun remediateProduction(longs: List<Long>, rules: List<String>): List<Long> {
         val ruleLUT: Map<Long, List<Pair<Long,Long>>> = ruleLut(rules)
 
         val rulesToApply = longs.map { ruleLUT[it] }.filterNotNull().flatten()
@@ -76,17 +76,65 @@ fun main() {
         // TODO implement applying the List<Pair<Long,Long>> to construct the new valid List<Long> using every element in longs
         // ...
 
+        var result = longs.toMutableList()
+        var i = 0
+        start@ while (i <= longs.lastIndex){
+            var num = result[i]
+            for(rule in ruleLUT[num]!!){
+                var indexOfFirst = result.indexOf(rule.first)
+                var indexOfSecond = result.indexOf(rule.second)
+                if((indexOfFirst == -1) || (indexOfSecond == -1)){
+                    continue    // skip rule
+                }
+
+                if (rule.first == num){
+                    // num comes first in list
+                    var movedItem = (indexOfFirst > indexOfSecond)
+                    while (indexOfFirst > indexOfSecond){
+                        var newIndex = indexOfFirst - 1
+                        var temp = result[newIndex]
+                        result[newIndex] = num
+                        result[indexOfSecond] = temp
+                        indexOfFirst = newIndex
+                    }
+                    if (movedItem) {
+                        i = 0
+                        continue@start
+                    }
+
+                } else {
+                    //num comes last in list
+                    var movedItem = (indexOfFirst > indexOfSecond)
+                    while (indexOfFirst > indexOfSecond){
+                        var newIndex = indexOfSecond + 1
+                        var temp = result[newIndex]
+                        result[newIndex] = num
+                        result[indexOfSecond] = temp
+                        indexOfSecond = newIndex
+                    }
+                    if (movedItem) {
+                        i = 0
+                        continue@start
+                    }
+
+                }
+
+            }
+            i++
+
+        }
+        return result
     }
 
 
 
 
-    fun part2(rules: List<String>, pageProductions: List<String>):  Int {
+    fun part2(rules: List<String>, pageProductions: List<String>): Long {
 
         val invalidProductions = filterProductions(rules, pageProductions, false).map { remediateProduction(it, rules) }
 
 
-        return rules.size
+        return invalidProductions.map { it[it.size/2] }.sum()
 
     }
 
